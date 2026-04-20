@@ -1,0 +1,280 @@
+/* ============================================================
+   rfc.css — RFC-style sheet for pandoc --standalone output
+   Target: pandoc docs/main.md -o docs/main.html \
+           --standalone --css=rfc.css
+   ============================================================ */
+
+/* --- Reset ------------------------------------------------ */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- Document --------------------------------------------- */
+
+body {
+    font-family: "Nimbus Mono PS", "Courier New", Courier, monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #000;
+    background: #fff;
+    max-width: 72ch;
+    margin: 48px auto;
+    padding: 0 1ch;
+}
+
+/* --- Pandoc title block -----------------------------------
+ *
+ * Generated from YAML frontmatter (title/author/date).
+ * Pandoc wraps these in:
+ *   <header id="title-block-header">
+ *     <h1 class="title">…</h1>
+ *     <p class="author">…</p>
+ *     <p class="date">…</p>
+ *   </header>
+ *
+ * RFC layout: title centred, author/date below, separated
+ * from the body by whitespace.
+ */
+
+header#title-block-header {
+    margin-bottom: 3em;
+}
+
+header#title-block-header .title {
+    font-size: inherit;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    border: none;
+    margin: 0 0 0.5em;
+    padding: 0;
+}
+
+header#title-block-header .subtitle {
+    font-size: inherit;
+    font-weight: normal;
+    text-align: center;
+    margin: 0 0 1em;
+    padding: 0;
+    border: none;
+}
+
+header#title-block-header .author,
+header#title-block-header .date {
+    font-size: inherit;
+    text-align: center;
+    margin: 0;
+}
+
+/* --- Sections ---------------------------------------------
+ *
+ * Pandoc wraps each heading + its content in <section>
+ * with an auto-generated id. No visual treatment needed.
+ */
+
+section {
+    display: block;
+}
+
+/* --- Headings --------------------------------------------- */
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: bold;
+    text-transform: uppercase;
+    line-height: inherit;
+    border: none;
+    padding: 0;
+    margin: 2em 0 0.5em;
+}
+
+/* Suppress double-margin when heading is first child of section */
+section > h1:first-child,
+section > h2:first-child,
+section > h3:first-child,
+section > h4:first-child {
+    margin-top: 0;
+}
+
+/* --- Paragraphs ------------------------------------------- */
+
+p {
+    margin: 0 0 1em;
+}
+
+/* --- Links ------------------------------------------------
+ *
+ * RFCs were plain text; links are underlined black, no colour.
+ */
+
+a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+a:visited {
+    color: inherit;
+}
+
+/* --- Code & preformatted ----------------------------------
+ *
+ * Pandoc wraps fenced code blocks in:
+ *   <div class="sourceCode">
+ *     <pre class="sourceCode"><code class="sourceCode …">…</code></pre>
+ *   </div>
+ *
+ * Inline code is plain <code>.
+ *
+ * RFC style: no background, no border, just indentation.
+ * The pygments colour tokens are left intact (pandoc injects
+ * their CSS inline) but the container gets RFC treatment.
+ */
+
+div.sourceCode {
+    margin: 1em 0 1em 3ch;
+}
+
+pre.sourceCode {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+code.sourceCode {
+    font-family: inherit;
+    font-size: inherit;
+    background: none;
+    padding: 0;
+}
+
+/* Inline code */
+code:not(.sourceCode) {
+    font-family: inherit;
+    font-size: inherit;
+    background: none;
+    padding: 0;
+}
+
+/* Plain pre (not pandoc-wrapped) */
+pre:not(.sourceCode) {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    margin: 1em 0 1em 3ch;
+    padding: 0;
+    background: none;
+    border: none;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+/* --- Blockquotes ------------------------------------------ */
+
+blockquote {
+    margin: 1em 0 1em 6ch;
+    padding: 0;
+    border: none;
+    font-style: normal;
+}
+
+/* --- Lists ------------------------------------------------ */
+
+ul, ol {
+    margin: 0 0 1em 6ch;
+    padding: 0;
+}
+
+li {
+    margin-bottom: 0.2em;
+}
+
+li > p {
+    margin: 0;
+}
+
+/* Definition lists */
+
+dl {
+    margin: 0 0 1em;
+}
+
+dt {
+    font-weight: bold;
+    margin-top: 0.75em;
+}
+
+dd {
+    margin: 0 0 0 6ch;
+}
+
+/* --- Tables ----------------------------------------------- */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+    font-size: inherit;
+}
+
+th, td {
+    border: 1px solid #000;
+    padding: 0.15em 0.75ch;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    font-weight: bold;
+    background: none;
+}
+
+/* --- Horizontal rules ------------------------------------- */
+
+hr {
+    border: none;
+    border-top: 1px solid #000;
+    margin: 2em 0;
+}
+
+/* --- Figures ----------------------------------------------
+ *
+ * Pandoc wraps images in <figure> with optional <figcaption>.
+ */
+
+figure {
+    margin: 1em 0 1em 3ch;
+}
+
+figcaption {
+    margin-top: 0.5em;
+    font-style: normal;
+}
+
+/* --- Print ------------------------------------------------ */
+
+@media print {
+    body {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        font-size: 10pt;
+    }
+
+    a {
+        text-decoration: none;
+    }
+}

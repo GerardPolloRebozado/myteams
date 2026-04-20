@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyTeams GUI - RFC 4242</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Login Modal -->
+        <div id="login-modal" class="modal">
+            <div class="modal-content">
+                <h2>Connect to MyTeams</h2>
+                <input type="text" id="host" placeholder="Server Host (e.g. localhost)" value="localhost">
+                <input type="number" id="port" placeholder="Port" value="4242">
+                <input type="text" id="username" placeholder="Username">
+                <button id="login-btn">Login</button>
+            </div>
+        </div>
+
+        <!-- Main Layout -->
+        <div id="main-ui" class="hidden">
+            <nav class="sidebar">
+                <div class="user-info">
+                    <span id="current-user-name">Not logged in</span>
+                    <button id="logout-btn">Logout</button>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3>Context</h3>
+                    <button id="go-global-btn" class="small-btn">🌍 Global Scope</button>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Teams</h3>
+                    <button id="create-team-btn" class="small-btn">+ New Team</button>
+                    <ul id="team-list"></ul>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Users</h3>
+                    <ul id="user-list"></ul>
+                </div>
+            </nav>
+
+            <main class="content">
+                <header id="chat-header">
+                    <div id="context-breadcrumb">/ Global</div>
+                    <div id="current-resource-info">Select a team or user to start chatting</div>
+                </header>
+
+                <div id="chat-messages" class="messages-container"></div>
+
+                <div class="input-area">
+                    <input type="text" id="message-input" placeholder="Type a message or command...">
+                    <button id="send-btn">Send</button>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

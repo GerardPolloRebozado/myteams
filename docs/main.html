@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>RFC MyTeams</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="rfc.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">RFC MyTeams</h1>
+</header>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td>Rewriting the World in Rust (RWR)<br />
+Request for Comments: 4242<br />
+Category: Communication</td>
+<td><span data-align="right">A.  Laguna<br />
+G.  Du Pre<br />
+18 April 2026</span></td>
+</tr>
+</tbody>
+</table>
+<p><span data-align="center">** MYTEAMS**</span></p>
+<h1 id="abstract">Abstract</h1>
+<p>This document describes the protocol and architecture of MyTeams, a
+text-based communication protocol that enables real-time messaging
+between users. The protocol supports group messaging via teams,
+channels, and threads, as well as private messaging. This document
+defines the message formats, stateful context management, and the
+asynchronous event system of the MyTeams protocol.</p>
+<h1 id="status-of-this-memo">Status of this memo</h1>
+<p>This document is a product of the Rewriting the World in Rust (RWR).
+It represents the consensus of the Rewriting the World in Rust
+community. It is the official specification of the MyTeams protocol.
+Distribution of this memo is unlimited.</p>
+<h1 id="copyright-notice">Copyright Notice</h1>
+<p>Copyright (c) 2026 European Institute of Technology and the persons
+identified as the document authors. All rights reserved.</p>
+<h1 id="introduction">Introduction</h1>
+<p>MyTeams is a text-based communication protocol operating over TCP. It
+is designed to be easy to implement while providing a rich set of
+features for collaboration. The protocol uses a client-server
+architecture where the server manages the global state (users, teams,
+messages) and broadcasts updates to connected clients.</p>
+<h1 id="conventions-used-in-this-document">Conventions used in this
+document</h1>
+<p>The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”,
+“SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this
+document are to be interpreted as described in RFC 2119.</p>
+<h1 id="protocol-overview">Protocol Overview</h1>
+<p>The protocol is line-oriented and UTF-8 encoded. Each message is
+terminated by a newline character (<code>\n</code>).</p>
+<h2 id="message-format">Message Format</h2>
+<h3 id="request-format">Request Format</h3>
+<p>Requests consist of a command name followed by optional arguments.
+Arguments containing spaces or special characters MUST be enclosed in
+double quotes and escaped using a backslash (<code>\</code>). Syntax:
+<code>COMMAND_NAME ["arg1" ["arg2" ...]]</code></p>
+<h3 id="response-format">Response Format</h3>
+<p>Responses consist of a three-digit code followed by an optional data
+payload. The data payload often contains space-separated quoted strings.
+Syntax: <code>CODE [DATA]</code></p>
+<h2 id="status-codes">Status Codes</h2>
+<ul>
+<li><p><code>200 OK</code>: Command executed successfully.</p></li>
+<li><p><code>201 CREATED</code>: Resource created successfully.</p></li>
+<li><p><code>400 BAD_REQUEST</code>: Invalid syntax or
+arguments.</p></li>
+<li><p><code>401 UNAUTHORIZED</code>: Authentication required.</p></li>
+<li><p><code>403 FORBIDDEN</code>: Permission denied.</p></li>
+<li><p><code>404 NOT_FOUND</code>: Resource not found.</p></li>
+<li><p><code>409 CONFLICT</code>: Resource already exists.</p></li>
+<li><p><code>442 I'M A COFFEE POT</code>: Server refuses to brew
+tea.</p></li>
+<li><p><code>500 INTERNAL_SERVER_ERROR</code>: Unexpected server
+error.</p></li>
+</ul>
+<h2 id="asynchronous-events-6xx">Asynchronous Events (6xx)</h2>
+<p>Events are pushed by the server to notify clients of external
+actions.</p>
+<ul>
+<li><p><code>600 LOGGED_IN</code>: A user logged in. Data:
+<code>"user_uuid" "user_name"</code></p></li>
+<li><p><code>601 LOGGED_OUT</code>: A user logged out. Data:
+<code>"user_uuid" "user_name"</code></p></li>
+<li><p><code>602 MESSAGE_RECEIVED</code>: Private message received.
+Data: <code>"sender_uuid" "body"</code></p></li>
+<li><p><code>603 THREAD_CREATED</code>: New thread created. Data:
+<code>"thread_uuid" "user_uuid" "timestamp" "title" "body"</code></p></li>
+<li><p><code>604 COMMENT_CREATED</code>: New reply created. Data:
+<code>"team_uuid" "thread_uuid" "user_uuid" "body"</code></p></li>
+<li><p><code>605 TEAM_CREATED</code>: New team created. Data:
+<code>"team_uuid" "team_name" "team_description"</code></p></li>
+<li><p><code>606 CHANNEL_CREATED</code>: New channel created. Data:
+<code>"channel_uuid" "channel_name" "channel_description"</code></p></li>
+</ul>
+<h1 id="resource-hierarchy-and-messaging">Resource Hierarchy and
+Messaging</h1>
+<p>The protocol enforces a strict hierarchical structure for group
+communication and a separate path for private communication.</p>
+<h2 id="resource-hierarchy">Resource Hierarchy</h2>
+<ul>
+<li><p><strong>Team</strong>: The top-level container for
+collaboration.</p></li>
+<li><p><strong>Channel</strong>: Created within a Team to group related
+Threads. A Team MUST support multiple Channels.</p></li>
+<li><p><strong>Thread</strong>: Created within a Channel. It represents
+a specific discussion topic. A Channel MUST support multiple
+Threads.</p></li>
+<li><p><strong>Reply</strong>: A message sent within a Thread.</p></li>
+</ul>
+<h2 id="messaging-types">Messaging Types</h2>
+<ul>
+<li><p><strong>Private Messaging</strong>: Direct 1-to-1 communication
+between users, independent of the Team/Channel hierarchy. Handled via
+the <code>SEND</code> and <code>MESSAGES</code> commands.</p></li>
+<li><p><strong>Threaded Messaging</strong>: Messages (Replies) sent
+within the context of a specific Thread. To send a reply, the user MUST
+be in a Thread context (inside a Channel, inside a Team).</p></li>
+</ul>
+<h1 id="commands">Commands</h1>
+<h2 id="authentication">Authentication</h2>
+<ul>
+<li><p><code>LOGIN "user_name"</code>: Authenticates or creates a user.
+Success: <code>200 "user_uuid" "user_name"</code>.</p></li>
+<li><p><code>LOGOUT</code>: Disconnects the user. Success: Connection is
+closed by the server.</p></li>
+</ul>
+<h2 id="user-information">User Information</h2>
+<ul>
+<li><p><code>USERS</code>: Lists all users. Success:
+<code>200 ["user_uuid" "user_name" "status"]*</code>. Status is 1
+(online) or 0 (offline).</p></li>
+<li><p><code>USER "user_uuid"</code>: Gets user details. Success:
+<code>200 "user_uuid" "user_name" "status"</code>.</p></li>
+</ul>
+<h2 id="messaging">Messaging</h2>
+<ul>
+<li><p><code>SEND "user_uuid" "body"</code>: Sends a private message.
+Success: <code>200</code>.</p></li>
+<li><p><code>MESSAGES "user_uuid"</code>: Lists private messages.
+Success: <code>200 ["sender_uuid" "timestamp" "body"]*</code>.</p></li>
+</ul>
+<h2 id="subscriptions">Subscriptions</h2>
+<ul>
+<li><p><code>SUBSCRIBE "team_uuid"</code>: Subscribes to a team.
+Success: <code>200 "user_uuid" "team_uuid"</code>.</p></li>
+<li><p><code>UNSUBSCRIBE "team_uuid"</code>: Unsubscribes from a team.
+Success: <code>200 "user_uuid" "team_uuid"</code>.</p></li>
+<li><p><code>SUBSCRIBED</code>: Lists teams subscribed to. Success:
+<code>200 ["team_uuid" "team_name" "team_description"]*</code>.</p></li>
+<li><p><code>SUBSCRIBED "team_uuid"</code>: Lists users in a team.
+Success: <code>200 ["user_uuid" "user_name" "status"]*</code>.</p></li>
+</ul>
+<h2 id="context-and-resource-management">Context and Resource
+Management</h2>
+<ul>
+<li><code>USE ["team_uuid" ["channel_uuid" ["thread_uuid"]]]</code>:
+Sets the current scope for <code>CREATE</code>, <code>LIST</code>, and
+<code>INFO</code>.</li>
+</ul>
+<h3 id="create">CREATE</h3>
+<p>Creates a resource in the current context:</p>
+<ul>
+<li><p>Global: <code>CREATE "name" "desc"</code> -&gt;
+<code>200 TEAM "uuid" "name" "desc"</code></p></li>
+<li><p>Team: <code>CREATE "name" "desc"</code> -&gt;
+<code>200 CHANNEL "uuid" "name" "desc"</code></p></li>
+<li><p>Channel: <code>CREATE "title" "body"</code> -&gt;
+<code>200 THREAD "uuid" "user_uuid" "ts" "title" "body"</code></p></li>
+<li><p>Thread: <code>CREATE "body"</code> -&gt;
+<code>200 REPLY "thread_uuid" "user_uuid" "ts" "body"</code></p></li>
+</ul>
+<h3 id="list">LIST</h3>
+<p>Lists items in the current context:</p>
+<ul>
+<li><p>Global: <code>200 TEAM ["uuid" "name" "desc"]*</code></p></li>
+<li><p>Team: <code>200 CHANNEL ["uuid" "name" "desc"]*</code></p></li>
+<li><p>Channel:
+<code>200 THREAD ["uuid" "user_uuid" "ts" "title" "body"]*</code></p></li>
+<li><p>Thread:
+<code>200 REPLY ["thread_uuid" "user_uuid" "ts" "body"]*</code></p></li>
+</ul>
+<h3 id="info">INFO</h3>
+<p>Gets details of the current resource:</p>
+<ul>
+<li><p>Global: <code>200 USER "uuid" "name" "status"</code></p></li>
+<li><p>Team: <code>200 TEAM "uuid" "name" "desc"</code></p></li>
+<li><p>Channel: <code>200 CHANNEL "uuid" "name" "desc"</code></p></li>
+<li><p>Thread:
+<code>200 THREAD "uuid" "user_uuid" "ts" "title" "body"</code></p></li>
+</ul>
+<h1 id="constraints">Constraints</h1>
+<ul>
+<li><p>Max Name: 32 chars.</p></li>
+<li><p>Max Description: 255 chars.</p></li>
+<li><p>Max Body: 512 chars.</p></li>
+</ul>
+<h1 id="authors-addresses">Authors” Addresses</h1>
+<p>A. Laguna<br />
+European Institute of Technology<br />
+Email: alejandro.laguna@epitech.eu</p>
+<p>G. Du Pre<br />
+European Institute of Technology<br />
+Email: gerard.du-pre@epitech.eu</p>
+</body>
+</html>
